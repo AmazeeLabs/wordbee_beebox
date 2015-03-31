@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * @file
+ * Module file of the translation management TMGMT Wordbee Beebox module.
+ *
+ * Url: http://www.beeboxlinks.com/
+ */
+
+/**
+ * Implements hook_tmgmt_translator_plugin_info().
+ */
+function tmgmt_wordbee_tmgmt_translator_plugin_info() {
+    return array(
+        'wordbee' => array(
+            'label' => t('Wordbee Beebox'),
+            'description' => t('Wordbee Beebox Translator'),
+            'plugin controller class' => 'TMGMTWordbeeBeeboxPluginController',
+            'ui controller class' => 'TMGMTWordbeeBeeboxUIController',
+            'default settings' => array(
+                'url' => '',
+                'projectKey' => '',
+                'username' => '',
+                'password' => '',
+                'leave_xliff_target_empty' => true
+            ),
+        ),
+    );
+}
+
+function _tmgmt_wordbee_poll_submit($form, &$form_state) {
+    /**
+     * @var TMGMTJob $job
+     */
+    $job = $form_state['tmgmt_job'];
+    /**
+     * @var TMGMTMyGengoTranslatorPluginController $controller
+     */
+    $controller = $job->getTranslator()->getController();
+
+    try {
+        $controller->updateCompletedJob($job);
+        drupal_set_message('The translation job have been refreshed');
+    } catch (Exception $e) {
+        drupal_set_message('Error while retrieving the translations from Beebox:' . $e->getMessage());
+    }
+}
+
+/**
+ * Implements hook_tmgmt_job_delete().
+ */
+function tmgmt_wordbee_tmgmt_job_delete(TMGMTJob $job) {
+    $translator = $job->getTranslator();
+
+    if (!$translator || $translator->plugin != 'wordbee') {
+        return;
+    }
+
+    //$translator->getController()->cancelTranslation($job);
+}
+
