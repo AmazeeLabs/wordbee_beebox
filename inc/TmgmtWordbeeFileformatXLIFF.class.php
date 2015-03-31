@@ -1,7 +1,7 @@
 <?php
 
 
-class TMGMTCustomFileformatXLIFF extends TMGMTFileformatXLIFF{
+class TmgmtWordbeeFileformatXLIFF extends TMGMTFileformatXLIFF{
     
     /**
      * Same as TMGMTFileformatXLIFF::addTransUnit() exept it leaves the target element empty

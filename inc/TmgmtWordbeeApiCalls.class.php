@@ -3,7 +3,7 @@
 /**
  * Class used to make calls to the Wordbee Beebox API
  */
-class API_calls {
+class TmgmtWordbeeApiCalls {
 
     private $connectorName;
     private $connectorVersion;
