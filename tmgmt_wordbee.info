@@ -3,6 +3,7 @@ description = Wordbee Beebox TMGMT plugin
 package = Translation Management
 core = 7.x
 dependencies[] = tmgmt
+dependencies[] = tmgmt_file
 files[] = tmgmt_wordbee.plugin.inc
 files[] = tmgmt_wordbee.ui.inc
 version = 7.x-1.02.02
