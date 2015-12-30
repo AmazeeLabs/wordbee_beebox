@@ -28,6 +28,69 @@ function tmgmt_wordbee_tmgmt_translator_plugin_info() {
     );
 }
 
+/**
+ * Implements hook_cron().
+ */
+function tmgmt_wordbee_cron() {
+
+    // Queue translation jobs for auto-refresh.
+    /** @var WordbeeUniqueQueue $queue */
+    $queue = DrupalQueue::get('tmgmt_wordbee_job_auto_update');
+    // There should be not many translators. Load them at once.
+    /** @var TMGMTTranslator $translator */
+    foreach (entity_load('tmgmt_translator', FALSE, array('plugin' => 'wordbee')) as $translator) {
+        if ($translator->isAvailable() && $translator->getSetting('refresh_on_cron')) {
+            $query = new EntityFieldQuery();
+            $result = $query
+                ->entityCondition('entity_type', 'tmgmt_job')
+                ->propertyCondition('translator', $translator->name)
+                ->propertyCondition('state', TMGMT_JOB_STATE_ACTIVE)
+                ->execute();
+            if (!empty($result['tmgmt_job'])) {
+                foreach (array_keys($result['tmgmt_job']) as $job_id) {
+                    $queue->createItem($job_id);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function tmgmt_wordbee_cron_queue_info() {
+    return array(
+        'tmgmt_wordbee_job_auto_update' => array(
+            'worker callback' => 'tmgmt_wordbee_job_auto_update_callback',
+            'time' => 120,
+        ),
+    );
+}
+
+/**
+ * Worker callback for the "tmgmt_wordbee_job_auto_update" queue.
+ *
+ * @param int $job_id
+ *   The ID of TMGMT Job to process.
+ */
+function tmgmt_wordbee_job_auto_update_callback($job_id) {
+    $job = tmgmt_job_load($job_id);
+    // Double check if we really need to update this job.
+    if ($job->getTranslator()->plugin == 'wordbee' && $job->getTranslator()->isAvailable() && $job->isActive()) {
+        /** @var TMGMTWordbeeBeeboxPluginController $controller */
+        $controller = $job->getTranslator()->getController();
+        try {
+            $controller->updateCompletedJob($job);
+        }
+        catch (Exception $e) {
+            watchdog('wordbee', 'Error while retrieving the translations for job @job_id from Beebox: @message', array(
+                '@job_id' => $job_id,
+                '@message' => $e->getMessage(),
+            ), WATCHDOG_ERROR);
+        }
+    }
+}
+
 function _tmgmt_wordbee_poll_submit($form, &$form_state) {
     /**
      * @var TMGMTJob $job

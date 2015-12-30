@@ -1,0 +1,22 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function tmgmt_wordbee_install() {
+  variable_set('queue_class_tmgmt_wordbee_job_auto_update', 'WordbeeUniqueQueue');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tmgmt_wordbee_uninstall() {
+  variable_del('queue_class_tmgmt_wordbee_job_auto_update');
+}
+
+/**
+ * Register WordbeeUniqueQueue class for "tmgmt_wordbee_job_auto_update" queue.
+ */
+function tmgmt_wordbee_update_7100() {
+  variable_set('queue_class_tmgmt_wordbee_job_auto_update', 'WordbeeUniqueQueue');
+}

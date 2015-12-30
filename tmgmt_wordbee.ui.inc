@@ -59,6 +59,12 @@ class TMGMTWordbeeBeeboxUIController extends TMGMTDefaultTranslatorUIController 
             '#default_value' => $translator->getSetting('password'),
             '#description' => 'Please enter your Beebox password',
         );
+        $form['refresh_on_cron'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Enable auto-refresh'),
+            '#default_value' => $translator->getSetting('refresh_on_cron'),
+            '#description' => t('Automatically refresh active translation jobs on cron. If there are ready translations, they will be imported.'),
+        );
         $form['leave_xliff_target_empty'] = array(
             '#type' => 'checkbox',
             '#title' => 'Leave XLIFF files target element empty',
